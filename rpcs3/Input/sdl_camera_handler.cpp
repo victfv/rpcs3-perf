@@ -10,6 +10,13 @@
 
 LOG_CHANNEL(camera_log, "Camera");
 
+typedef enum SDL_CameraPermissionState
+{
+	SDL_CAMERA_PERMISSION_STATE_DENIED = -1,
+	SDL_CAMERA_PERMISSION_STATE_PENDING,
+	SDL_CAMERA_PERMISSION_STATE_APPROVED
+} SDL_CameraPermissionState;
+
 template <>
 void fmt_class_string<SDL_CameraSpec>::format(std::string& out, u64 arg)
 {
