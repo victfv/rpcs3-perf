@@ -92,8 +92,6 @@
 
 #include <QEventLoop>
 #include <QTimer>
-#include <QShortcut>
-#include "Emu/Perf/perf_capture.h"
 
 #ifdef _WIN32
 #include "raw_mouse_settings_dialog.h"
@@ -170,14 +168,6 @@ extern void qt_events_aware_op(int repeat_duration_ms, std::function<bool()> wra
 	}
 }
 
-void toggle_capture()
-{
-	if (!perf::capture_enabled)
-		perf::start_capture();
-	else
-		perf::stop_capture();
-}
-
 main_window::main_window(std::shared_ptr<gui_settings> gui_settings, std::shared_ptr<emu_settings> emu_settings, std::shared_ptr<persistent_settings> persistent_settings, QWidget *parent)
 	: QMainWindow(parent)
 	, ui(new Ui::main_window)
@@ -190,14 +180,6 @@ main_window::main_window(std::shared_ptr<gui_settings> gui_settings, std::shared
 
 	// We have to setup the ui before using a translation
 	ui->setupUi(this);
-
-	////////Shortcut for turning performance profiling on
-	auto* shortcut = new QShortcut(QKeySequence("F10"), this);
-	connect(shortcut, &QShortcut::activated, this, [this]()
-	{
-		toggle_capture();
-	});
-	////////
 
 	setAttribute(Qt::WA_DeleteOnClose);
 }
