@@ -80,6 +80,21 @@ namespace rsx
 			f32 m_rsx_usage{0};
 			u32 m_rsx_load{0};
 
+			// ── CSV recording ────────────────────────────────────────────────────────────
+			std::ofstream m_csv_file;
+			bool m_csv_active = false;
+			u64 m_csv_start_us = 0; // get_system_time() no início da gravação
+			
+			// Valores cacheados para o CSV — preenchidos em update(), gravados quando ativo
+			float m_csv_fps = 0.f;
+			float m_csv_frametime_ms = 0.f;
+			float m_csv_emu_speed = 0.f;
+			float m_csv_ppu_pct = 0.f; // % que já existe no overlay
+			float m_csv_spu_pct = 0.f;
+						
+			// Toggle chamado pelo hotkey F11
+			void csv_toggle();
+
 			void reset_transform(label& elm) const;
 			void reset_transforms();
 			void reset_body();
@@ -110,6 +125,9 @@ namespace rsx
 			void update(u64 timestamp_us) override;
 
 			compiled_resource get_compiled() override;
+			
+			// Chamado pelo handler de teclado Qt
+			void on_csv_hotkey() { csv_toggle(); }
 		};
 
 		void reset_performance_overlay();
