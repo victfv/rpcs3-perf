@@ -8,8 +8,13 @@
 #include <algorithm>
 #include <cmath>
 #include <utility>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+
 
 #include "util/cpu_stats.hpp"
+#include "Utilities/File.h" // fs::get_config_dir()
 
 namespace rsx
 {
@@ -197,7 +202,7 @@ namespace rsx
 				reset_transform(m_titles);
 			}
 
-			if (m_framerate_graph_enabled || m_frametime_graph_enabled)
+			if (m_framerate_graph_enabled ||_enabled)
 			{
 				// Position the graphs within the body
 				const u16 graphs_width = m_body.w;
@@ -495,6 +500,7 @@ namespace rsx
 					const float elapsed_frame = static_cast<float>(m_frametime_timer.GetElapsedTimeInMilliSec());
 					m_frametime_timer.Start();
 					m_frametime_graph.record_datapoint(elapsed_frame, do_update);
+					m_csv_frametime_ms = elapsed_frame; //added
 					m_frametime_graph.set_title(fmt::format("Frametime: %4.1f", elapsed_frame).c_str());
 				}
 
@@ -548,7 +554,9 @@ namespace rsx
 						m_cpu_usage    = static_cast<f32>(m_cpu_stats.get_usage());
 
 						m_ppu_usage = std::clamp(m_cpu_usage * m_ppu_cycles / m_total_cycles, 0.f, 100.f);
+						m_csv_ppu_pct = static_cast<float>(m_ppu_usage); //added
 						m_spu_usage = std::clamp(m_cpu_usage * m_spu_cycles / m_total_cycles, 0.f, 100.f);
+						m_csv_spu_pct = static_cast<float>(m_spu_usage); //added
 						m_rsx_usage = std::clamp(m_cpu_usage * m_rsx_cycles / m_total_cycles, 0.f, 100.f);
 
 						[[fallthrough]];
@@ -661,7 +669,59 @@ namespace rsx
 					m_frametime_graph.update();
 				}
 			}
+			if (m_csv_active)
+			{
+ 				const u64 now_us = get_system_time();
+ 				const double elapsed = static_cast<double>(now_us - m_csv_start_us) / 1000.0;
+ 				// PPU/SPU: converter % → ms usando o intervalo de update real
+				const float ppu_ms = m_csv_ppu_pct * static_cast<float>(elapsed_update) / 100.f;
+ 				const float spu_ms = m_csv_spu_pct * static_cast<float>(elapsed_update) / 100.f;
+ 				m_csv_file
+ 					<< std::fixed << std::setprecision(3)
+ 					<< elapsed << ','
+ 					<< m_csv_fps << ','
+ 					<< m_csv_frametime_ms << ','
+				  	<< m_csv_emu_speed << ','
+ 					<< ppu_ms << ','
+ 					<< spu_ms
+ 					<< '\n';
+ 					m_csv_file.flush();
+			}
+
 		}
+		
+		void perf_metrics_overlay::csv_toggle() //added
+		{
+ 			if (m_csv_active)
+ 			{
+ 				// Parar gravação
+ 				m_csv_active = false;
+ 				if (m_csv_file.is_open())
+ 				{
+					m_csv_file.flush();
+ 			 		m_csv_file.close();
+ 				}
+ 				return;
+ 			}
+ 			// Iniciar gravação — montar nome do arquivo
+ 			const auto now = std::chrono::system_clock::now();
+ 			const auto now_t = std::chrono::system_clock::to_time_t(now);
+ 			std::ostringstream name;
+ 			name << fs::get_config_dir()
+ 				 << "perf_"
+ 				 << std::put_time(std::localtime(&now_t), "%Y%m%d_%H%M%S")
+ 				 << ".csv";
+ 			
+			m_csv_file.open(name.str(), std::ios::out | std::ios::trunc);
+ 			if (!m_csv_file.is_open())
+ 				return;
+ 			
+			// Cabeçalho
+ 			m_csv_file << "elapsed_ms,fps,frametime_ms,emu_speed_pct,ppu_ms,spu_ms\n";
+ 			m_csv_start_us = get_system_time();
+ 			m_csv_active = true;
+		}
+
 
 		compiled_resource perf_metrics_overlay::get_compiled()
 		{
