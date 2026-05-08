@@ -132,4 +132,5 @@ namespace rsx
 
 		void reset_performance_overlay();
 	}
+	extern atomic_t<bool> g_perf_csv_toggle;
 }
