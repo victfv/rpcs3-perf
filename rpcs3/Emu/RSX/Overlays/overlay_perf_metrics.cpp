@@ -16,6 +16,8 @@
 #include "util/cpu_stats.hpp"
 #include "Utilities/File.h" // fs::get_config_dir()
 
+atomic_t<bool> g_perf_csv_toggle{false};
+
 namespace rsx
 {
 	namespace overlays
@@ -490,6 +492,10 @@ namespace rsx
 
 		void perf_metrics_overlay::update(u64 /*timestamp_us*/)
 		{
+			if (g_perf_csv_toggle.exchange(false))
+			{	
+				csv_toggle();
+			}	
 			const auto elapsed_update = m_update_timer.GetElapsedTimeInMilliSec();
 			const bool do_update = m_force_update || elapsed_update >= m_update_interval;
 
