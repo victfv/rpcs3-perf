@@ -21,6 +21,7 @@
 #include "Emu/Io/interception.h"
 #include "Emu/Io/recording_config.h"
 #include "Input/pad_thread.h"
+#include "Emu/RSX/Overlays/overlay_perf_metrics.h"
 
 #include <QApplication>
 #include <QDateTime>
@@ -415,6 +416,15 @@ void gs_frame::handle_shortcut(gui::shortcuts::shortcut shortcut_key, const QKey
 			const bool mouse_gyro_enabled = pad_thr->get_mouse_gyro().toggle_enabled();
 			gui_log.notice("Mouse-based gyro emulation %s", mouse_gyro_enabled ? "enabled" : "disabled");
 		}
+		break;
+	}
+	case gui::shortcuts::shortcut::gw_toggle_csv_dump:
+	{
+		if (rsx::overlays::perf_metrics_overlay::get_csv_active())
+			rsx::overlays::queue_message(std::string("Stopping CSV capture"));
+		else
+			rsx::overlays::queue_message(std::string("Starting CSV capture"));
+		g_perf_csv_toggle.store(true);
 		break;
 	}
 	default:

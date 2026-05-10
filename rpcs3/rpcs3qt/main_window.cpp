@@ -2517,18 +2517,6 @@ void main_window::CreateActions()
 	m_list_mode_act_group = new QActionGroup(this);
 	m_list_mode_act_group->addAction(ui->setListModeAct);
 	m_list_mode_act_group->addAction(ui->setGridModeAct);
-
-	// F11 — toggle gravação CSV do performance overlay
-	// QShortcut é a forma correta quando não há uma QAction no .ui para isso
-	const auto perf_csv_shortcut = new QShortcut(QKeySequence(Qt::Key_F11), this);
-	perf_csv_shortcut->setContext(Qt::ApplicationShortcut);
-
-	connect(perf_csv_shortcut, &QShortcut::activated, this, []()
-	{
-    	// Usa a variável global atômica — o update() do overlay vai capturar na
-    	// próxima iteração (dentro de m_update_interval ms, tipicamente ~350ms)
-    	g_perf_csv_toggle.store(true);
-	});
 }
 
 void main_window::CreateConnects()

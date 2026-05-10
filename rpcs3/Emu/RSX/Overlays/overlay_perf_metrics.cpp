@@ -4,6 +4,7 @@
 #include "Emu/RSX/RSXThread.h"
 #include "Emu/Cell/SPUThread.h"
 #include "Emu/Cell/PPUThread.h"
+#include "Emu/RSX/Overlays/overlay_message.h"
 
 #include <algorithm>
 #include <cmath>
@@ -22,6 +23,7 @@ namespace rsx
 {
 	namespace overlays
 	{
+
 		inline color4f convert_color_code(std::string hex_color, f32 opacity = 1.0f)
 		{
 			if (hex_color.length() > 0 && hex_color[0] == '#')
@@ -204,7 +206,7 @@ namespace rsx
 				reset_transform(m_titles);
 			}
 
-			if (m_framerate_graph_enabled ||_enabled)
+			if (m_framerate_graph_enabled ||m_frametime_graph_enabled)
 			{
 				// Position the graphs within the body
 				const u16 graphs_width = m_body.w;
@@ -506,7 +508,6 @@ namespace rsx
 					const float elapsed_frame = static_cast<float>(m_frametime_timer.GetElapsedTimeInMilliSec());
 					m_frametime_timer.Start();
 					m_frametime_graph.record_datapoint(elapsed_frame, do_update);
-					m_csv_frametime_ms = elapsed_frame; //added
 					m_frametime_graph.set_title(fmt::format("Frametime: %4.1f", elapsed_frame).c_str());
 				}
 
@@ -535,7 +536,6 @@ namespace rsx
 					case detail_level::high:
 					{
 						m_frametime = std::max(0.f, static_cast<float>(elapsed_update / m_frames));
-
 						m_rsx_load = rsx_thread.get_load();
 
 						m_total_threads = utils::cpu_stats::get_current_thread_count();
@@ -654,7 +654,7 @@ namespace rsx
 				}
 
 				m_body.refresh();
-
+				m_csv_frametime_ms = static_cast<float>(std::max(0.f, static_cast<float>(elapsed_update / m_frames))); //added
 				if (!m_force_update)
 				{
 					m_frames = 0;
@@ -682,6 +682,7 @@ namespace rsx
  				// PPU/SPU: converter % → ms usando o intervalo de update real
 				const float ppu_ms = m_csv_ppu_pct * static_cast<float>(elapsed_update) / 100.f;
  				const float spu_ms = m_csv_spu_pct * static_cast<float>(elapsed_update) / 100.f;
+
  				m_csv_file
  					<< std::fixed << std::setprecision(3)
  					<< elapsed << ','
@@ -698,6 +699,7 @@ namespace rsx
 		
 		void perf_metrics_overlay::csv_toggle() //added
 		{
+
  			if (m_csv_active)
  			{
  				// Parar gravação

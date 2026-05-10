@@ -3,6 +3,7 @@
 #include "overlays.h"
 #include "util/cpu_stats.hpp"
 #include "Emu/system_config_types.h"
+#include <fstream>
 
 namespace rsx
 {
@@ -82,7 +83,7 @@ namespace rsx
 
 			// ── CSV recording ────────────────────────────────────────────────────────────
 			std::ofstream m_csv_file;
-			bool m_csv_active = false;
+			static inline bool m_csv_active;
 			u64 m_csv_start_us = 0; // get_system_time() no início da gravação
 			
 			// Valores cacheados para o CSV — preenchidos em update(), gravados quando ativo
@@ -101,8 +102,8 @@ namespace rsx
 			void reset_titles();
 
 		public:
+			static bool get_csv_active() {return m_csv_active;}
 			void init();
-
 			void set_framerate_graph_enabled(bool enabled);
 			void set_frametime_graph_enabled(bool enabled);
 			void set_framerate_datapoint_count(u32 datapoint_count);
@@ -132,5 +133,5 @@ namespace rsx
 
 		void reset_performance_overlay();
 	}
-	extern atomic_t<bool> g_perf_csv_toggle;
 }
+extern atomic_t<bool> g_perf_csv_toggle;
