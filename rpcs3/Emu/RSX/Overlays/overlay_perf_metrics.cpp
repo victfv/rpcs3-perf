@@ -549,9 +549,9 @@ namespace rsx
 							m_ppu_cycles += thread_ctrl::get_cycles(ppu);
 						});
 
-						m_spus = idm::select<named_thread<spu_thread>>([this](u32, named_thread<spu_thread>& spu)
+						m_s = idm::select<named_thread<_thread>>([this](u32, named_thread<_thread>& )
 						{
-							m_spu_cycles += thread_ctrl::get_cycles(spu);
+							m__cycles += thread_ctrl::get_cycles();
 						});
 
 						m_rsx_cycles += rsx_thread.get_cycles();
@@ -560,9 +560,9 @@ namespace rsx
 						m_cpu_usage    = static_cast<f32>(m_cpu_stats.get_usage());
 
 						m_ppu_usage = std::clamp(m_cpu_usage * m_ppu_cycles / m_total_cycles, 0.f, 100.f);
-						m_csv_ppu_pct = static_cast<float>(m_ppu_usage); //added
+						//m_csv_ppu_pct = static_cast<float>(m_ppu_usage); //added
 						m_spu_usage = std::clamp(m_cpu_usage * m_spu_cycles / m_total_cycles, 0.f, 100.f);
-						m_csv_spu_pct = static_cast<float>(m_spu_usage); //added
+						//m_csv_spu_pct = static_cast<float>(m_spu_usage); //added
 						m_rsx_usage = std::clamp(m_cpu_usage * m_rsx_cycles / m_total_cycles, 0.f, 100.f);
 
 						[[fallthrough]];
@@ -680,17 +680,17 @@ namespace rsx
  				const u64 now_us = get_system_time();
  				const double elapsed = static_cast<double>(now_us - m_csv_start_us) / 1000.0;
  				// PPU/SPU: converter % → ms usando o intervalo de update real
-				const float ppu_ms = m_csv_ppu_pct * static_cast<float>(elapsed_update) / 100.f;
- 				const float spu_ms = m_csv_spu_pct * static_cast<float>(elapsed_update) / 100.f;
+				//const float ppu_ms = m_csv_ppu_pct * static_cast<float>(elapsed_update) / 100.f;
+ 				//const float spu_ms = m_csv_spu_pct * static_cast<float>(elapsed_update) / 100.f;
 
  				m_csv_file
  					<< std::fixed << std::setprecision(3)
  					<< elapsed << ','
- 					<< m_csv_fps << ','
+ 					//<< m_csv_fps << ','
  					<< m_csv_frametime_ms << ','
-				  	<< m_csv_emu_speed << ','
- 					<< ppu_ms << ','
- 					<< spu_ms
+				  	//<< m_csv_emu_speed << ','
+ 					<< m_ppu_usage << ','
+ 					<< m_spu_usage
  					<< '\n';
  					m_csv_file.flush();
 			}
