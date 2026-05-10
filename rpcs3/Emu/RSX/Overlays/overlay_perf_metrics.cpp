@@ -725,7 +725,7 @@ namespace rsx
  				return;
  			
 			// Cabeçalho
- 			m_csv_file << "elapsed_ms,fps,frametime_ms,emu_speed_pct,ppu_ms,spu_ms\n";
+ 			m_csv_file << "elapsed_ms,frametime_ms,ppu_usage,spu_usage\n";
  			m_csv_start_us = get_system_time();
  			m_csv_active = true;
 		}
