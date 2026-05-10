@@ -549,9 +549,9 @@ namespace rsx
 							m_ppu_cycles += thread_ctrl::get_cycles(ppu);
 						});
 
-						m_s = idm::select<named_thread<_thread>>([this](u32, named_thread<_thread>& )
+						m_spus = idm::select<named_thread<spu_thread>>([this](u32, named_thread<spu_thread>& spu)
 						{
-							m__cycles += thread_ctrl::get_cycles();
+							m_spu_cycles += thread_ctrl::get_cycles(spu);
 						});
 
 						m_rsx_cycles += rsx_thread.get_cycles();
