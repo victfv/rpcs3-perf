@@ -693,6 +693,12 @@ namespace rsx
  					<< m_spu_usage
  					<< '\n';
  					m_csv_file.flush();
+ 					// Auto-stop após 1 minuto
+    					if ((now_us - m_csv_start_us) >= csv_capture_duration_us)
+    					{
+        					stop_csv_capture();
+        					//rsx::overlays::queue_message(std::string("CSV capture finished (auto-stop)"));
+    					}
 			}
 
 		}
@@ -703,12 +709,7 @@ namespace rsx
  			if (m_csv_active)
  			{
  				// Parar gravação
- 				m_csv_active = false;
- 				if (m_csv_file.is_open())
- 				{
-					m_csv_file.flush();
- 			 		m_csv_file.close();
- 				}
+ 				stop_csv_capture();
  				return;
  			}
  			// Iniciar gravação — montar nome do arquivo
@@ -728,6 +729,20 @@ namespace rsx
  			m_csv_file << "elapsed_ms,frametime_ms,ppu_usage,spu_usage\n";
  			m_csv_start_us = get_system_time();
  			m_csv_active = true;
+		}
+		
+		void perf_metrics_overlay::stop_csv_capture()
+		{
+    			if (!m_csv_active)
+        		return;
+
+    			m_csv_active = false;
+
+    			if (m_csv_file.is_open())
+    			{
+        			m_csv_file.flush();
+        			m_csv_file.close();
+    			}
 		}
 
 

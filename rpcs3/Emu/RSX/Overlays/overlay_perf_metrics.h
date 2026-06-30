@@ -92,14 +92,19 @@ namespace rsx
 			float m_csv_emu_speed = 0.f;
 			float m_csv_ppu_pct = 0.f; // % que já existe no overlay
 			float m_csv_spu_pct = 0.f;
+			static constexpr u64 csv_capture_duration_us = 60'000'000ull; // 1 minuto em microssegundos
 						
 			// Toggle chamado pelo hotkey F11
 			void csv_toggle();
-
+			void stop_csv_capture(); // centraliza a lógica de parada
+			
 			void reset_transform(label& elm) const;
 			void reset_transforms();
 			void reset_body();
 			void reset_titles();
+		
+
+
 
 		public:
 			static bool get_csv_active() {return m_csv_active;}
